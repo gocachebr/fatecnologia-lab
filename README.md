@@ -83,6 +83,9 @@ O comando utilizado para a realização do ataque foi o mesmo que nos casos ante
 ./ddos.sh 200 60
 ```
 
+Veja quais foram os impactos do terceiro ataque:
+![rl-gocache](./imgs/rl-gocache.png)
+
 É possível ver nesse caso, no painel da CDN as requisições que foram barradas:
 ![rl-analytics-gocache](./imgs/rl-analytics-gocache.png)
 
