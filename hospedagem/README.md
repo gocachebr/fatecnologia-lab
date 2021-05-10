@@ -6,9 +6,9 @@
 ```
 sudo yum update -y
 ```
-- Instalamos o  repositório oficial de pacotes pré compilados do Centos:
+- Instalamos o  repositório oficial de pacotes pré compilados do Centos e o wget para baixar arquivos:
 ```
-sudo yum install epel-release
+sudo yum install epel-release wget -y
 ```
 - Instalamos pré requisitos necessários para configurar repositórios externos:
 ```
@@ -19,7 +19,7 @@ sudo yum install yum-utils -y
 
 - Criamos um arquivo referenciando o repositório oficial do Nginx para o centos 7:
 ```
-sudo echo "[nginx-stable]
+sudo echo '[nginx-stable]
 name=nginx stable repo
 baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
 gpgcheck=1
@@ -33,7 +33,7 @@ baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
 gpgcheck=1
 enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
-module_hotfixes=true" >> /etc/yum.repos.d/nginx.repo
+module_hotfixes=true' | sudo tee -a /etc/yum.repos.d/nginx.repo
 ```
 - Habilitamos o repositório no gerenciador de pacotes:
 ```
@@ -49,8 +49,8 @@ sudo systemctl enable nginx
 ```
 - Iniciamos o nginx e verificamos o status do serviço:
 ```
-sudo systemctl nginx start
-sudo systemctl nginx status
+sudo systemctl start nginx
+sudo systemctl status nginx
 ```
 > Ref: http://nginx.org/en/linux_packages.html#RHEL-CentOS
 
@@ -62,7 +62,7 @@ sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm -y
 ```
 - Habilitamos a versão 7.4 do PHP para ser instalado:
 ```
-sudo yum-config-manager --enable remi-php74	
+sudo yum-config-manager --enable remi-php74 
 ```
 - Instalamos o PHP e suas extensões necessárias para rodar o Wordpress:
 ```
@@ -78,7 +78,7 @@ Encontre as linhas com o parâmetro "user","group" e "listen". Deixe essas opç�
 ```
 user = nginx
 group = nginx
-liste = 127.0.0.1:9000
+listen = 127.0.0.1:9000
 ```
 - Habilite o serviço do php-fpm para ser iniciado com o sistema operacional:
 ```
@@ -96,7 +96,7 @@ sudo yum install https://dev.mysql.com/get/mysql57-community-release-el7-9.noarc
  ```
 - Instalamos o MySql 5.7 Server:
 ```
-sudo yum install mysql-server 
+sudo yum install mysql-server -y
 ```
 - Habilitamos o MySQL e iniciamos o serviço:
 ```
@@ -110,7 +110,7 @@ sudo grep --color=auto 'temporary password' /var/log/mysqld.log
 ```
 Uma linha com o padrão abaixo deve ser apresentada ao executar o comando acima:
 ```
-2016-12-01T00:22:31.416107Z 1 [Note] A temporary password is generated for root@localhost: mqRfBU_3Xk>r
+2016-12-01T00:22:31.416107Z 1 [Note] A temporary password is generated for root@localhost: fdfDymCy9j?N
 ```
 Com a senha temporária em mãos podemos seguir com a configuração do MySql:
 ```
@@ -147,13 +147,14 @@ create database fatecnologia;
 ```
 create user 'fatecnologia'@'%' identified by 'bzwYI483uGMs/';
 grant all privileges on fatecnologia.* to 'fatecnologia'@'%';
-flush privileges;  
+flush privileges;
+exit  
 ```
 >ref: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-centos-7
 ## Instalar o Wordpress
 - Baixamos o wordpress em **"/var/www/html"**:
 ```
-sudo cd /var/www/html/
+cd /var/www/html/
 sudo wget https://br.wordpress.org/latest-pt_BR.tar.gz
 ```
 - Descompactamos o download e renomeamos a pasta do Wordpress:
@@ -185,9 +186,6 @@ upstream php {
 }
 
 server {
-
-        # Porta que o Nginx vai utilizar para receber as requisições:
-        listen 80;
 
         # Configura uma pasta para os logs de acesso/erro do site 
         error_log /var/log/fatecnologia/fatecnologia.log ;
@@ -232,10 +230,11 @@ server {
 - Após configurar este arquivo basta criar a pasta de destino dos logs de acesso/erro do website e verificar se a sintaxe está correta para recarregar o Nginx:
 
 ```
+sudo systemctl stop nginx
 sudo mkdir -p /var/log/fatecnologia/
 sudo chown nginx:nginx /var/log/fatecnologia/ -R
 sudo chmod 755 /var/log/fatecnologia/ -R
-sudo nginx -T && sudo nginx -s reload
+sudo systemctl start nginx
 ```
 Com essa operação finalizada, você pode fazer um acesso ao site no seu navegador para verificar se o acesso está operacional.
 
@@ -299,7 +298,12 @@ Select the appropriate numbers separated by commas and/or spaces, or leave input
 blank to select all options shown (Enter 'c' to cancel): 1
 ```
 
-Uma vez que o domínio é informado o SSL deve ser gerado e configurado automaticamente.
+Uma vez que o domínio é informado o SSL deve ser gerado e configurado automaticamente informando a mensagem de sucesso:
+```
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Congratulations! You have successfully enabled https://fatecnologia.gocdn.com.br
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+```
 
 ## Configurar o Rate Limit no Nginx
 
@@ -353,12 +357,12 @@ Para habilitar e desabilitar a configuração de Rate Limit do Website configura
 - Para ativar a configuração de ratelimit:
 ```
 sudo ln -sf /etc/nginx/conf.d/fatecnologia.gocdn.com.br.conf-ratelimit /etc/nginx/conf.d/fatecnologia.gocdn.com.br.conf
-sudo nginx -t && nginx -s reload
+sudo service nginx restart
 ```
 - Para desativar a configuração de Rate Limit:
 ```
 sudo ln -sf /etc/nginx/conf.d/fatecnologia.gocdn.com.br.conf-default /etc/nginx/conf.d/fatecnologia.gocdn.com.br.conf
-sudo nginx -t && nginx -s reload
+sudo service nginx restart
 ```
 
 ## Instalar e configurar o Netdata para gerar métricas
@@ -367,10 +371,11 @@ sudo nginx -t && nginx -s reload
 
 
 ```
-sudo bash <(curl -Ss https://my-netdata.io/kickstart.sh)
+# Executar o comando abaixo como root
+bash <(curl -Ss https://my-netdata.io/kickstart.sh)
 ```
 > Ref: https://learn.netdata.cloud/docs/agent/packaging/installer
-Aguarde a instalação finaliza...
+Aguarde a instalação finalizar...
 
 Após a instalação finalizar é necessário configurar o Netdata para verificar os arquivos de log do Website. Para isso utilizamos o plugin baseado na linguagem Golang que vem instalado no Netdata por padrão.
 
