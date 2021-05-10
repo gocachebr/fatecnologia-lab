@@ -26,23 +26,19 @@ Para as simulações são apresentados 3 momentos distintos:
 ### Ataque Livre
 Nesse cenário o objetivo é ver o quão impactante é para uma hospedagem receber um ataque direto em sua aplicação sem nenhum tipo de proteção.
 
-Para isso deixaremos o definido como "Modo Default" de configuração do NGinx, para isso basta rodar rodar o script na máquina hospedagem:
-
-```bash
-sudo ./nginx-mode.sh default
-```
+Para isso deixaremos o definido a configuração padrão do NGinx, ou seja, a configuração inicial feita no Wordpress sem nenhum tipo de proteção. 
 
 Em sequência recomendamos que deixe aberto tanto os gráficos do NetData, quanto o próprio Wordpress, para que possa ser acompanhado o aumento de uso de recurso e a lentidão no site.
 
-Por fim, basta realizar o ataque na máquina atacante, utilizando o script e informando a quantidade de conexões que serão realizadas por segundo e a duração do ataque (nesse caso estamos rodando o script como Root diretamente):
+Por fim, basta realizar o ataque na máquina atacante, utilizando o script e informando a quantidade de conexões que serão realizadas por segundo, a duração do ataque e a URL que será acessada:
 
 ```bash
-./ddos.sh <conexões> <duração>
+./http-flood -url <url> -connections <conexões> -duration <duração>
 ```
 
 No exemplo em questão estamos solicitando 200 requisições por segundo durante 1 minuto:
 ```bash
-./ddos.sh 200 60
+./http-flood -url https://fatecnologia.gocdn.com.br/?s= -connections 200 -duration 60
 ```
 
 Vale desatacar nem sempre será possível de fato estabelecer as 200 requisições por segundo como desejado, visto que pode haver limitações da rede, recursos da máquina ou mesmo da plataforma que está sendo usado para criar as máquinas.
@@ -53,18 +49,13 @@ Veja os aumentos dos uso de recurso pelo NetData:
 Acompanhe também a lentidão no Wordpress, uma maneira prática de checar isso é realizando uma pesquisa no site.
 
 ### Ataque com Rate Limit aplicado no NGinx
-Nesse segundo cenário, será aplicado um Rate Limit direto no NGinx. Para fazer essa ativação basta deixar definido como "Modo Rate Limit" nas configurações do NGinx.
-
-Na máquina da hospedagem, é basta executar o seguinte comando:
-```bash
-sudo ./nginx-mode.sh rate-limit
-```
+Nesse segundo cenário, será aplicado um Rate Limit direto no NGinx. Para fazer essa ativação, é necessário seguir as configurações informadas no tutorial de configuração da hospedagem sobre a aplicação de configuração do Rate Limit.
 
 Da mesma maneira como anteriormente, recomendamos que seja deixado os gráficos do NetData e o Wordpress abertos para uma visualização dos impactos que serão causados pelo ataque com a utilização do Rate Limit.
 
 Na máquina atacante será utilizado o script de ataque da seguinte maneira:
 ```bash
-./ddos.sh 200 60
+./http-flood -url https://fatecnologia.gocdn.com.br/?s= -connections 200 -duration 60
 ```
 
 Veja quais foram os impactos do segundo ataque:
@@ -80,7 +71,7 @@ Em sequência realizar o ataque na máquina atacante e acompanhar o uso de recur
 
 O comando utilizado para a realização do ataque foi o mesmo que nos casos anteriores:
 ```bash
-./ddos.sh 200 60
+./http-flood -url https://fatecnologia.gocdn.com.br/?s= -connections 200 -duration 60
 ```
 
 Veja quais foram os impactos do terceiro ataque:
